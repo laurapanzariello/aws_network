@@ -5,14 +5,46 @@ resource "aws_vpc" "vpc_a" {
   }
 }
 
-resource "aws_subnet" "public_subnet" {
-  count = 4
+resource "aws_internet_gateway" "igw_vpc_a" {
   vpc_id = "${aws_vpc.vpc_a.id}"
-  cidr_block = "${cidrsubnet(aws_vpc.vpc_a.cidr_block, 4, count.index)}"
-  availability_zone = "${data.aws_availability_zones.available.names[count.index]}"
   tags = {
-    "Name" = "public_subnet_${data.aws_availability_zones.available.names[count.index]}"
+    "Name" = "IGW_VPC_A"
   }
+}
+
+resource "aws_route_table" "route_table_a" {
+  vpc_id = "${aws_vpc.vpc_a.id}"
+  route {
+    cidr_block = "0.0.0.0/0"   
+    gateway_id = "${aws_internet_gateway.igw_vpc_a.id}"
+  }     
+  tags = {
+    "Name" = "route_table_public_subnet"
+  }
+}
+
+resource "aws_subnet" "public_subnet" {
+  vpc_id = "${aws_vpc.vpc_a.id}"
+  cidr_block = "${cidrsubnet(aws_vpc.vpc_a.cidr_block, 4, 0)}"
+  availability_zone = "${data.aws_availability_zones.available.names[0]}"
+  tags = {
+    "Name" = "public_subnet_${data.aws_availability_zones.available.names[0]}"
+  }
+}
+
+# resource "aws_subnet" "public_subnet" {
+#   count = 4
+#   vpc_id = "${aws_vpc.vpc_a.id}"
+#   cidr_block = "${cidrsubnet(aws_vpc.vpc_a.cidr_block, 4, count.index)}"
+#   availability_zone = "${data.aws_availability_zones.available.names[count.index]}"
+#   tags = {
+#     "Name" = "public_subnet_${data.aws_availability_zones.available.names[count.index]}"
+#   }
+# }
+
+resource "aws_route_table_association" "route_table_public_subnet" {
+  subnet_id = "${aws_subnet.public_subnet.id}"
+  route_table_id = "${aws_route_table.route_table_a.id}"
 }
 
 resource "aws_subnet" "private_subnet" {
