@@ -24,26 +24,18 @@ resource "aws_route_table" "route_table_a" {
 }
 
 resource "aws_subnet" "public_subnet" {
+  count = 4
   vpc_id = "${aws_vpc.vpc_a.id}"
-  cidr_block = "${cidrsubnet(aws_vpc.vpc_a.cidr_block, 4, 0)}"
-  availability_zone = "${data.aws_availability_zones.available.names[0]}"
+  cidr_block = "${cidrsubnet(aws_vpc.vpc_a.cidr_block, 4, count.index)}"
+  availability_zone = "${data.aws_availability_zones.available.names[count.index]}"
   tags = {
-    "Name" = "public_subnet_${data.aws_availability_zones.available.names[0]}"
+    "Name" = "public_subnet_${data.aws_availability_zones.available.names[count.index]}"
   }
 }
 
-# resource "aws_subnet" "public_subnet" {
-#   count = 4
-#   vpc_id = "${aws_vpc.vpc_a.id}"
-#   cidr_block = "${cidrsubnet(aws_vpc.vpc_a.cidr_block, 4, count.index)}"
-#   availability_zone = "${data.aws_availability_zones.available.names[count.index]}"
-#   tags = {
-#     "Name" = "public_subnet_${data.aws_availability_zones.available.names[count.index]}"
-#   }
-# }
-
 resource "aws_route_table_association" "route_table_public_subnet" {
-  subnet_id = "${aws_subnet.public_subnet.id}"
+  count = 4
+  subnet_id = "${aws_subnet.public_subnet.*.id[count.index]}"
   route_table_id = "${aws_route_table.route_table_a.id}"
 }
 
