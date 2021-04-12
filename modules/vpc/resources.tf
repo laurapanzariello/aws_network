@@ -9,6 +9,10 @@ resource "aws_vpc" "vpc" {
   }
 }
 
+data "aws_vpc" "selected" {
+  id = aws_vpc.vpc.id
+}
+
 resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.vpc.id
   tags = {
@@ -64,4 +68,10 @@ resource "aws_subnet" "private_db_subnet" {
   tags = {
     "Name" = "private_db_subnet_data.aws_availability_zones.available.names[count.index]"
   }
+}
+
+resource "aws_ec2_transit_gateway_vpc_attachment" "vpc_attach" {
+  subnet_ids = aws_subnet.public_subnet.*.id
+  transit_gateway_id = var.tgw_id
+  vpc_id = aws_vpc.vpc.id
 }

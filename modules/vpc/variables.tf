@@ -18,6 +18,11 @@ variable "rt_name" {
   type = string
 }
 
+variable "tgw_id" {
+  description = "Transit Gateway Id"
+  type = string
+}
+
 variable "all_address" {
   description = "Represents all cidr blocks"
   type = string
