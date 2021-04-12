@@ -75,3 +75,9 @@ resource "aws_ec2_transit_gateway_vpc_attachment" "vpc_attach" {
   transit_gateway_id = var.tgw_id
   vpc_id = aws_vpc.vpc.id
 }
+
+resource "aws_route" "gtw_route" {
+  route_table_id = aws_vpc.vpc.main_route_table_id
+  destination_cidr_block = var.all_address
+  transit_gateway_id = var.tgw_id
+}
